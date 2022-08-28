@@ -260,15 +260,155 @@ Consider including folks who also work outside the SIG or subproject.
 
 ## Design Details
 
-- volumebindingプラグインのstatedataにNode別のDynamic Provisioningのデータを保存するように変更します
-- スコアリングの際に保存したDynamic Provisioningのデータを元にしたスコアリング処理を追加します
-
 <!--
 This section should contain enough information that the specifics of your
 change are understandable. This may include API specs (though not always
 required) or even code snippets. If there's any ambiguity about HOW your
 proposal will be implemented, this is the place to discuss them.
 -->
+
+既存のvolumebindingプラグインに手を入れて、Dynamic Provisioningのスコアリングを実現します。
+
+### volumeBindingプラグイン用のstateDataの変更
+
+Dynamic Provisioningのスコアリングのために `stateData` に含まれる `PodVolumes` のstructを変更します。
+stateDateの現在のstructは以下の様になっていて、`PodVolumes` は `podVolumesByNode` に含まれています。
+
+```go
+type stateData struct {
+	skip         bool
+	boundClaims  []*v1.PersistentVolumeClaim
+	claimsToBind []*v1.PersistentVolumeClaim
+	allBound     bool
+	podVolumesByNode map[string]*PodVolumes
+	sync.Mutex
+}
+```
+
+この `PodVolumes` を以下のように変更することで `PersistentVolumeClaim` に加えて `CSIStorageCapacity` を保存可能にします。
+
+```diff
++ type DynamicProvision struct {
++ 	PVC      *v1.PersistentVolumeClaim
++ 	Capacity *storagev1.CSIStorageCapacity
++ }
+
+type PodVolumes struct {
+	StaticBindings []*BindingInfo
+-   DynamicProvisions []*v1.PersistentVolumeClaim
++ 	DynamicProvisions []*DynamicProvision
+}
+```
+
+### DynamicProvisionのCapacityの取得
+
+`volumeBinder.hasEnough` メソッドで`CSIStorageCapacity`を返すよう返り値を増やして、DynamicProvisionの場合には `DynamicProvision.Capacity` フィールドを設定するように変更します。
+
+```diff
+- func (b *volumeBinder) hasEnoughCapacity(provisioner string, claim *v1.PersistentVolumeClaim, storageClass *storagev1.StorageClass, node *v1.Node) (bool, error) {
++ func (b *volumeBinder) hasEnoughCapacity(provisioner string, claim *v1.PersistentVolumeClaim, storageClass *storagev1.StorageClass, node *v1.Node) (bool, *storagev1.CSIStorageCapacity, error) {
+	quantity, ok := claim.Spec.Resources.Requests[v1.ResourceStorage]
+	if !ok {
+		// No capacity to check for.
+- 		return true, nil
+- 		return true, nil, nil
+	}
+
+	// Only enabled for CSI drivers which opt into it.
+	driver, err := b.csiDriverLister.Get(provisioner)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			// Either the provisioner is not a CSI driver or the driver does not
+			// opt into storage capacity scheduling. Either way, skip
+			// capacity checking.
+- 			return true, nil
++ 			return true, nil, nil
+		}
+- 		return false, err
++ 		return false, nil, err
+	}
+	if driver.Spec.StorageCapacity == nil || !*driver.Spec.StorageCapacity {
+- 		return true, nil
++ 		return true, nil, nil
+	}
+
+	// Look for a matching CSIStorageCapacity object(s).
+	// TODO (for beta): benchmark this and potentially introduce some kind of lookup structure (https://github.com/kubernetes/enhancements/issues/1698#issuecomment-654356718).
+	capacities, err := b.csiStorageCapacityLister.List(labels.Everything())
+	if err != nil {
+- 		return false, err
++ 		return false, nil, err
+	}
+
+  sizeInBytes := quantity.Value()
+	for _, capacity := range capacities {
+		if capacity.StorageClassName == storageClass.Name &&
+			capacitySufficient(capacity, sizeInBytes) &&
+			b.nodeHasAccess(node, capacity) {
+			// Enough capacity found.
+- 			return true, nil
++ 			return true, capacity, nil
+		}
+	}
+
+	// TODO (?): this doesn't give any information about which pools where considered and why
+	// they had to be rejected. Log that above? But that might be a lot of log output...
+	klog.V(4).InfoS("Node has no accessible CSIStorageCapacity with enough capacity for PVC",
+		"node", klog.KObj(node), "PVC", klog.KObj(claim), "size", sizeInBytes, "storageClass", klog.KObj(storageClass))
+- 	return false, nil
++ 	return false, nil, nil
+}
+```
+
+### DynamicProvisionのスコアリング処理
+
+volumeBindingプラグインのScoreメソッドでDynamicProvisionによるスコアリング処理を追加します。
+各 `podVolumes.DynamicProvisions` の `Capacity` が `nil` では無いものをスコアリング対象として処理を行います。
+
+スコアリング方法は既存のStaticBindingsに対する仕組みを使用して行います。
+`scorer` の渡される `classResources` にはそれぞれ
+
+- `Requested: provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]`
+- `Capacity: CSIStorageCapacity`
+
+を設定することで `VolumeBindingArgs` の `Shape` 設定に基づき、DynamicProvisionの空き容量を考慮したスコアリングを実現します。
+
+```diff
+// Score invoked at the score extension point.
+func (pl *VolumeBinding) Score(ctx context.Context, cs *framework.CycleState, pod *v1.Pod, nodeName string) (int64, *framework.Status) {
+	if pl.scorer == nil {
+		return 0, nil
+	}
+	state, err := getStateData(cs)
+	if err != nil {
+		return 0, framework.AsStatus(err)
+	}
+	podVolumes, ok := state.podVolumesByNode[nodeName]
+
+    ...
+
++   // add dynamic binding volumes by storage class
++ 	for _, provision := range podVolumes.DynamicProvisions {
++ 		if provision.Capacity == nil {
++ 			continue
++ 		}
++ 		class := *provision.PVC.Spec.StorageClassName
++ 		if _, ok := classResources[class]; !ok {
++ 			classResources[class] = &StorageResource{
++ 				Requested: 0,
++ 				Capacity:  0,
++ 			}
++ 		}
++ 		requestedQty := provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]
++ 		classResources[class].Requested += requestedQty.Value()
++ 		classResources[class].Capacity += provision.Capacity.Capacity.Value()
++ 	}
+
+  return pl.scorer(classResources), nil
+```
+
+下記のPRでこれらの設計を含めたPoC実装を行っています:
+https://github.com/bells17/kubernetes/pull/1
 
 ### Test Plan
 
