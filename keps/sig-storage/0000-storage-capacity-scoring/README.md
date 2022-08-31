@@ -366,7 +366,7 @@ volumeBindingプラグインのScoreメソッドでDynamicProvisionによるス�
 各 `podVolumes.DynamicProvisions` の `Capacity` が `nil` では無いものをスコアリング対象として処理を行います。
 
 スコアリング方法は既存のStaticBindingsに対する仕組みを使用して行います。
-`scorer` の渡される `classResources` にはそれぞれ
+`scorer` に渡される `classResources` にはそれぞれ
 
 - `Requested: provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]`
 - `Capacity: CSIStorageCapacity`
