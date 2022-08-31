@@ -311,7 +311,7 @@ type PodVolumes struct {
 	if !ok {
 		// No capacity to check for.
 - 		return true, nil
-- 		return true, nil, nil
++ 		return true, nil, nil
 	}
 
 	// Only enabled for CSI drivers which opt into it.
