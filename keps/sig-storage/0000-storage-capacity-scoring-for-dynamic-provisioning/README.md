@@ -152,7 +152,7 @@ Items marked with (R) are required *prior to targeting to a milestone / release*
 ## Summary
 
 volumebindingプラグインによるスコアリングにStorage Capacityを利用したDynamic Provisioningのスコアを追加します。
-Dynamic Provisioningのプロビジョニング先の空き容量を考慮することで、 `volumebindingmode: WaitForFirstConsumer` なStorageClassを利用したPodのスケジューリング先の選定にプロビジョニング先の空き容量が考慮されることになります。
+Dynamic Provisioningのプロビジョニング先の空き容量を考慮することで、podが使っているストレージの残容量が多いノードに優先的にpodを割り当てるようにします。
 
 <!--
 This section is incredibly important for producing high-quality, user-focused
