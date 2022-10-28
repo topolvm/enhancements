@@ -175,8 +175,9 @@ updates.
 
 ## Motivation
 
+ノードローカルなPVがスケジュールされた後リサイズできるように、また、ノード間でなるべく均等にストレージを使うように、できるだけ空き容量が多いノードを選択したいことがあります。
+あるいは逆に、ノードの個数をできるだけ減らすために、ノードの空き容量が少ないノードを選択したいことがあります。
 Dynamic Provisioningの空き容量が考慮されることで、ボリュームの空き容量に応じてスケジュール先を決定することが可能になります。
-これによりTopoLVMのような `volumebindingmode: WaitForFirstConsumer` を利用したスケジュールを行うCSIドライバーが独自の拡張を行うことなくボリュームの空き容量に応じたスケジューリングが可能になります。
 
 <!--
 This section is for explicitly listing the motivation, goals, and non-goals of
