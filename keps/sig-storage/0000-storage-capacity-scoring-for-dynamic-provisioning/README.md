@@ -231,6 +231,10 @@ bogged down.
 Dynamic Provisioningの空き容量に応じたスコアリングが可能になることで、`volumebindingmode: WaitForFirstConsumer` の設定を利用するCSIドライバーがボリュームをプロビジョニングする際にプロビジョニング先のトポロジーの空き容量を考慮するようになります。
 例えばTopoLVMの場合、LVMをボリュームに利用していますが、Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、必要最小限の空き容量を持ったノードを優先的に割り当てることが可能になります。
 
+#### Story 2
+
+Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、Story 1とは逆に空き容量の多いノードを優先的に割り当てる事も可能になります。それにより、割り当て後にボリューム拡張の余地を持たせることができます。
+
 ### Notes/Constraints/Caveats (Optional)
 
 <!--
