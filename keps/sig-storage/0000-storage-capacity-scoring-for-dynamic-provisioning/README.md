@@ -197,6 +197,8 @@ know that this has succeeded?
 
 ### Non-Goals
 
+空き容量が少ないノードに優先的にpodを割り当てるケース。
+
 <!--
 What is out of scope for this KEP? Listing non-goals helps to focus discussion
 and make progress.
