@@ -246,7 +246,7 @@ This might be a good place to talk about core concepts and how they relate.
 
 ### Risks and Mitigations
 
-- volumebindingプラグインにスコアリングのためのロジックを追加するため、volumebingプラグインの実装の複雑度が増加します
+- volumebindingプラグインにスコアリングのためのロジックを追加するため、volumebindingプラグインの実装の複雑度が増加します
 - Dynamic Provisioningの空き容量がスコアリングに影響を与えるようになるため、スケジューリングの優先度に影響を与えます
 
 <!--
