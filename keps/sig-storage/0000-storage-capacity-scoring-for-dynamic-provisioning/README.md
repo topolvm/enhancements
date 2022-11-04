@@ -190,9 +190,6 @@ demonstrate the interest in a KEP within the wider Kubernetes community.
 
 ### Goals
 
-- Dynamic Provisioningの空き容量に応じたスコアリングを可能にします
-- KubeSchedulerConfigurationのvolumebindingプラグインの `Shape` に応じたスコアリングを可能にします
-
 <!--
 List the specific goals of the KEP. What is it trying to achieve? How will we
 know that this has succeeded?
@@ -206,6 +203,8 @@ and make progress.
 -->
 
 ## Proposal
+
+- Dynamic Provisioningの空き容量が多いノードほどスコアが高くなります。
 
 <!--
 This is where we get down to the specifics of what the proposal actually is.
