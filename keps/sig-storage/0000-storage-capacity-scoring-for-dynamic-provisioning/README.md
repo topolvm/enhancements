@@ -247,7 +247,10 @@ This might be a good place to talk about core concepts and how they relate.
 ### Risks and Mitigations
 
 - volumebindingプラグインにスコアリングのためのロジックを追加するため、volumebindingプラグインの実装の複雑度が増加します
+  - なお、volumebindingプラグインはその名の通りプラグインであるため、それを利用する側の複雑性にはそれほど影響を与えないと考えられます
 - Dynamic Provisioningの空き容量がスコアリングに影響を与えるようになるため、スケジューリングの優先度に影響を与えます
+  - なお、この機能を無効化すればリスクを回避することが可能です
+- 不具合等の何らかの理由によりノードの空き容量が取得できない場合、スケジューリングが動作しなくなる可能性があります
 
 <!--
 What are the risks of this proposal, and how do we mitigate? Think broadly.
