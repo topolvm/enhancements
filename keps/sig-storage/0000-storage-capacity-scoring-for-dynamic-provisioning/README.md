@@ -85,14 +85,12 @@ tags, and then generate with `hack/update-toc.sh`.
 - [Proposal](#proposal)
   - [User Stories (Optional)](#user-stories-optional)
   - [Notes/Constraints/Caveats (Optional)](#notesconstraintscaveats-optional)
-  - [Risks and Mitigations](#risks-and-mitigations)
 - [Design Details](#design-details)
   - [volumeBindingプラグイン用のstateDataの変更](#volumebindingプラグイン用のstatedataの変更)
   - [DynamicProvisionのCapacityの取得](#dynamicprovisionのcapacityの取得)
   - [DynamicProvisionのスコアリング処理](#dynamicprovisionのスコアリング処理)
   - [Test Plan](#test-plan)
   - [Graduation Criteria](#graduation-criteria)
-  - [Upgrade / Downgrade Strategy](#upgrade--downgrade-strategy)
   - [Version Skew Strategy](#version-skew-strategy)
 - [Production Readiness Review Questionnaire](#production-readiness-review-questionnaire)
   - [Feature Enablement and Rollback](#feature-enablement-and-rollback)
@@ -102,8 +100,6 @@ tags, and then generate with `hack/update-toc.sh`.
   - [Scalability](#scalability)
   - [Troubleshooting](#troubleshooting)
 - [Implementation History](#implementation-history)
-- [Drawbacks](#drawbacks)
-- [Alternatives](#alternatives)
 - [Infrastructure Needed (Optional)](#infrastructure-needed-optional)
 <!-- /toc -->
 
@@ -198,7 +194,7 @@ know that this has succeeded?
 
 ### Non-Goals
 
-空き容量が少ないノードに優先的にpodを割り当てるケース。
+- staticとdynamicでスコアリングの仕方を変える
 
 <!--
 What is out of scope for this KEP? Listing non-goals helps to focus discussion
@@ -229,11 +225,11 @@ bogged down.
 
 #### Story 1
 
-クラウドを利用する際はコスト削減のため、できるだけノード数を少なくしたいです。そのためできるだけ無駄なノードを作らないように、Podのスケジュールを行う際に可能な限り残り容量が少ないノードの優先度を高めたいです。Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、必要最小限の空き容量を持ったノードを優先的に割り当てることが可能になります。
+ノード割り当て後にボリューム拡張の余地が残るようにしたいと考えた場合、Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、必要最大限の空き容量を持ったノードを優先的に割り当てるといった対応が可能になります。
 
 #### Story 2
 
-また、ノード割り当て後にボリューム拡張の余地が残るようにしたいと考えた場合も、Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、必要最大限の空き容量を持ったノードを優先的に割り当てるといった対応が可能になります。
+クラウドを利用する際はコスト削減のため、できるだけノード数を少なくしたいです。そのためできるだけ無駄なノードを作らないように、Podのスケジュールを行う際に可能な限り残り容量が少ないノードの優先度を高めたいです。Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、必要最小限の空き容量を持ったノードを優先的に割り当てることが可能になります。
 
 ### Notes/Constraints/Caveats (Optional)
 
@@ -242,26 +238,6 @@ What are the caveats to the proposal?
 What are some important details that didn't come across above?
 Go in to as much detail as necessary here.
 This might be a good place to talk about core concepts and how they relate.
--->
-
-### Risks and Mitigations
-
-- volumebindingプラグインにスコアリングのためのロジックを追加するため、volumebindingプラグインの実装の複雑度が増加します
-  - なお、volumebindingプラグインはその名の通りプラグインであるため、それを利用する側の複雑性にはそれほど影響を与えないと考えられます
-- Dynamic Provisioningの空き容量がスコアリングに影響を与えるようになるため、スケジューリングの優先度に影響を与えます
-  - なお、この機能を無効化すればリスクを回避することが可能です
-- 不具合等の何らかの理由によりノードの空き容量が取得できない場合、スケジューリングが動作しなくなる可能性があります
-
-<!--
-What are the risks of this proposal, and how do we mitigate? Think broadly.
-For example, consider both security and how this will impact the larger
-Kubernetes ecosystem.
-
-How will security be reviewed, and by whom?
-
-How will UX be reviewed, and by whom?
-
-Consider including folks who also work outside the SIG or subproject.
 -->
 
 ## Design Details
@@ -558,23 +534,6 @@ in back-to-back releases.
 - Deprecate the flag
 -->
 
-### Upgrade / Downgrade Strategy
-
-<!--
-If applicable, how will the component be upgraded and downgraded? Make sure
-this is in the test plan.
-
-Consider the following in developing an upgrade/downgrade strategy for this
-enhancement:
-- What changes (in invocations, configurations, API use, etc.) is an existing
-  cluster required to make on upgrade, in order to maintain previous behavior?
-- What changes (in invocations, configurations, API use, etc.) is an existing
-  cluster required to make on upgrade, in order to make use of the enhancement?
--->
-
-kube-schedulerでStorageCapacityScoring feature gateを有効にすることで機能を有効化します。
-無効にすることで機能が無効化されます。
-
 ### Version Skew Strategy
 
 <!--
@@ -739,7 +698,7 @@ previous answers based on experience in the field.
 
 ###### How can an operator determine if the feature is in use by workloads?
 
-スケジューリングに影響を与えるだけなのでワークロードには影響ありません
+See featuregate.
 
 <!--
 Ideally, this should be a metric. Operations against the Kubernetes API (e.g.,
@@ -971,20 +930,6 @@ Major milestones might include:
 - the first Kubernetes release where an initial version of the KEP was available
 - the version of Kubernetes where the KEP graduated to general availability
 - when the KEP was retired or superseded
--->
-
-## Drawbacks
-
-<!--
-Why should this KEP _not_ be implemented?
--->
-
-## Alternatives
-
-<!--
-What other approaches did you consider, and why did you rule them out? These do
-not need to be as detailed as the proposal, but should include enough
-information to express the idea and why it was not acceptable.
 -->
 
 ## Infrastructure Needed (Optional)
