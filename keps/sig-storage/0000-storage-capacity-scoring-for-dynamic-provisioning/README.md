@@ -148,7 +148,7 @@ Items marked with (R) are required *prior to targeting to a milestone / release*
 ## Summary
 
 volumebindingプラグインによるスコアリングにStorage Capacityを利用したDynamic Provisioningのスコアを追加します。
-Dynamic Provisioningのプロビジョニング先の空き容量を考慮することで、podが使っているストレージの残容量が多いノードに優先的にpodを割り当てるようにします。
+Dynamic Provisioningのプロビジョニング先の空き容量を考慮することで、podが使っているストレージの残容量に応じてpodを割り当てるようにします。
 
 <!--
 This section is incredibly important for producing high-quality, user-focused
@@ -203,7 +203,7 @@ and make progress.
 
 ## Proposal
 
-- Dynamic Provisioningの空き容量が多いノードほどスコアが高くなります。
+- Dynamic Provisioningの空き容量に応じたスコアリングが可能になります
 
 <!--
 This is where we get down to the specifics of what the proposal actually is.
