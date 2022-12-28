@@ -625,7 +625,7 @@ NOTE: Also set `disable-supported` to `true` or `false` in `kep.yaml`.
 
 ###### Are there any tests for feature enablement/disablement?
 
-TODO
+Yes. We will add unit tests with and without the feature gate enabled.
 
 <!--
 The e2e framework does not currently support enabling or disabling feature
@@ -670,8 +670,6 @@ that might indicate a serious problem?
 -->
 
 ###### Were upgrade and rollback tested? Was the upgrade->downgrade->upgrade path tested?
-
-TODO
 
 <!--
 Describe manual testing that was done and the outcomes.
