@@ -147,8 +147,8 @@ Items marked with (R) are required *prior to targeting to a milestone / release*
 
 ## Summary
 
-volumebindingプラグインによるスコアリングにStorage Capacityを利用したDynamic Provisioningのスコアを追加します。
-Dynamic Provisioningのプロビジョニング先の空き容量を考慮することで、podが使っているストレージの残容量に応じてpodを割り当てるようにします。
+This KEP proposes adding dynamic provisioning scores using storage capacity to scoring with the VolumeBinding plugin.
+By considering the free space for dynamic provisioning, it is possible to schedule pods considering storage capacity.
 
 <!--
 This section is incredibly important for producing high-quality, user-focused
@@ -171,8 +171,10 @@ updates.
 
 ## Motivation
 
-ノードローカルなPVがスケジュールされた後リサイズできるように、また、ノード間でなるべく均等にストレージを使うように、できるだけ空き容量が多いノードを選択したいことがあります。
-あるいは逆に、ノードの個数をできるだけ減らすために、ノードの空き容量が少ないノードを選択したいことがあります。
+On the following cases, it is needed to schedule pods considering storage capacity.
+
+- ノードローカルなPVがスケジュールされた後リサイズできるように、また、ノード間でなるべく均等にストレージを使うように、できるだけ空き容量が多いノードを選択したい
+- ノードの個数をできるだけ減らすために、ノードの空き容量が少ないノードを選択したいことがあります。
 
 <!--
 This section is for explicitly listing the motivation, goals, and non-goals of
