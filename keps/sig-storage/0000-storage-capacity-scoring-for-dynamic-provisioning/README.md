@@ -173,8 +173,8 @@ updates.
 
 On the following cases, it is needed to schedule pods considering storage capacity.
 
-- ノードローカルなPVがスケジュールされた後リサイズできるように、また、ノード間でなるべく均等にストレージを使うように、できるだけ空き容量が多いノードを選択したい
-- ノードの個数をできるだけ減らすために、ノードの空き容量が少ないノードを選択したいことがあります。
+- We want to select a node with as much free space as possible so that we can resize after a node-local PV is scheduled, and use storage as evenly as possible among the nodes.
+- Or, we want to select a node with less free node space to reduce the number of nodes as much as possible.
 
 <!--
 This section is for explicitly listing the motivation, goals, and non-goals of
@@ -187,7 +187,7 @@ demonstrate the interest in a KEP within the wider Kubernetes community.
 
 ### Goals
 
-Dynamic Provisioningの空き容量が考慮されることで、ボリュームの空き容量に応じてスケジュール先を決定することが可能になります。
+By considering the free space of Dynamic Provisioning, it is possible to schedule according to the free space of the volume.
 
 <!--
 List the specific goals of the KEP. What is it trying to achieve? How will we
