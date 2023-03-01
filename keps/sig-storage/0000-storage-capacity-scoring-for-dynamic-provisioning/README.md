@@ -86,7 +86,7 @@ tags, and then generate with `hack/update-toc.sh`.
   - [User Stories (Optional)](#user-stories-optional)
   - [Notes/Constraints/Caveats (Optional)](#notesconstraintscaveats-optional)
 - [Design Details](#design-details)
-  - [volumeBindingプラグイン用のstateDataの変更](#volumebindingプラグイン用のstatedataの変更)
+  - [Modify stateData to be able to store StorageCapacity](#modify-statedata-to-be-able-to-store-storagecapacity)
   - [DynamicProvisionのCapacityの取得](#dynamicprovisionのcapacityの取得)
   - [DynamicProvisionのスコアリング処理](#dynamicprovisionのスコアリング処理)
   - [Test Plan](#test-plan)
@@ -196,7 +196,7 @@ know that this has succeeded?
 
 ### Non-Goals
 
-- staticとdynamicでスコアリングの仕方を変える
+- Change the way its score with static and dynamic
 
 <!--
 What is out of scope for this KEP? Listing non-goals helps to focus discussion
@@ -205,7 +205,7 @@ and make progress.
 
 ## Proposal
 
-- Dynamic Provisioningの空き容量に応じたスコアリングが可能になります
+- Dynamic Provisioning can be scored based on available space
 
 <!--
 This is where we get down to the specifics of what the proposal actually is.
@@ -227,11 +227,11 @@ bogged down.
 
 #### Story 1
 
-ノード割り当て後にボリューム拡張の余地が残るようにしたいと考えた場合、Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、必要最大限の空き容量を持ったノードを優先的に割り当てるといった対応が可能になります。
+If we want to leave room for volume expansion after node allocation, we can provision with free space in consideration during Dynamic Provisioning, so that nodes with the maximum amount of free space required can be prioritized.
 
 #### Story 2
 
-クラウドを利用する際はコスト削減のため、できるだけノード数を少なくしたいです。そのためできるだけ無駄なノードを作らないように、Podのスケジュールを行う際に可能な限り残り容量が少ないノードの優先度を高めたいです。Dynamic Provisioningの際に空き容量を考慮したプロビジョニングを行えるようになることで、必要最小限の空き容量を持ったノードを優先的に割り当てることが可能になります。
+When using the cloud, we want to reduce the number of nodes as much as possible to reduce costs. Therefore, we would like to increase the priority of nodes with as little remaining capacity as possible when scheduling pods so as not to create useless nodes as much as possible. By making it possible to provision with free space in mind during Dynamic Provisioning, it is possible to preferentially allocate nodes with the minimum necessary free space.
 
 ### Notes/Constraints/Caveats (Optional)
 
@@ -251,12 +251,13 @@ required) or even code snippets. If there's any ambiguity about HOW your
 proposal will be implemented, this is the place to discuss them.
 -->
 
-既存のvolumebindingプラグインに手を入れて、Dynamic Provisioningのスコアリングを実現します。
+We modify the existing VolumeBinding plugin to achieve Dynamic Provisioning scoring.
 
-### volumeBindingプラグイン用のstateDataの変更
+### Modify stateData to be able to store StorageCapacity
 
-Dynamic Provisioningのスコアリングのために `stateData` に含まれる `PodVolumes` のstructを変更します。
-stateDateの現在のstructは以下の様になっていて、`PodVolumes` は `podVolumesByNode` に含まれています。
+We modify the struct of `PodVolumes` contained in `stateData` for Dynamic Provisioning scoring.
+
+The struct of `stateData` is as follows.
 
 ```go
 type stateData struct {
@@ -269,7 +270,7 @@ type stateData struct {
 }
 ```
 
-この `PodVolumes` を以下のように変更することで `PersistentVolumeClaim` に加えて `CSIStorageCapacity` を保存可能にします。
+By changing this `PodVolumes` as follows, `CSIStorageCapacity` can be stored.
 
 ```diff
 + type DynamicProvision struct {
@@ -286,7 +287,7 @@ type PodVolumes struct {
 
 ### DynamicProvisionのCapacityの取得
 
-`volumeBinder.hasEnough` メソッドで`CSIStorageCapacity`を返すよう返り値を増やして、DynamicProvisionの場合には `DynamicProvision.Capacity` フィールドを設定するように変更します。
+Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapacity` method. This returns the `DynamicProvision.Capacity` field in the case of Dynamic Provisioning.
 
 ```diff
 - func (b *volumeBinder) hasEnoughCapacity(provisioner string, claim *v1.PersistentVolumeClaim, storageClass *storagev1.StorageClass, node *v1.Node) (bool, error) {
