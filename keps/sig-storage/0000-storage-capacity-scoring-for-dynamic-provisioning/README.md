@@ -87,8 +87,8 @@ tags, and then generate with `hack/update-toc.sh`.
   - [Notes/Constraints/Caveats (Optional)](#notesconstraintscaveats-optional)
 - [Design Details](#design-details)
   - [Modify stateData to be able to store StorageCapacity](#modify-statedata-to-be-able-to-store-storagecapacity)
-  - [DynamicProvisionのCapacityの取得](#dynamicprovisionのcapacityの取得)
-  - [DynamicProvisionのスコアリング処理](#dynamicprovisionのスコアリング処理)
+  - [Get the capacity for Dynamic Provisioning](#get-the-capacity-for-dynamic-provisioning)
+  - [Scoring for Dynamic Provisioning](#scoring-for-dynamic-provisioning)
   - [Test Plan](#test-plan)
   - [Graduation Criteria](#graduation-criteria)
   - [Version Skew Strategy](#version-skew-strategy)
@@ -285,7 +285,7 @@ type PodVolumes struct {
 }
 ```
 
-### DynamicProvisionのCapacityの取得
+### Get the capacity for Dynamic Provisioning
 
 Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapacity` method. This returns the `DynamicProvision.Capacity` field in the case of Dynamic Provisioning.
 
@@ -345,18 +345,16 @@ Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapac
 }
 ```
 
-### DynamicProvisionのスコアリング処理
+### Scoring for Dynamic Provisioning
 
-volumeBindingプラグインのScoreメソッドでDynamicProvisionによるスコアリング処理を追加します。
-各 `podVolumes.DynamicProvisions` の `Capacity` が `nil` では無いものをスコアリング対象として処理を行います。
+Add scoring with Dynamic Provisioning in the Score method of the VolumeBinding plugin. The scoring targets are each entry in `podVolumes.DynamicProvisions` where `Capacity` is not equal to `nil`.
 
-スコアリング方法は既存のStaticBindingsに対する仕組みを使用して行います。
-`scorer` に渡される `classResources` にはそれぞれ
+Scoring is implemented using the existing StaticBindings mechanism. Set the followings to `classResources` passed to the `scorer` function:
 
 - `Requested: provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]`
 - `Capacity: CSIStorageCapacity`
 
-を設定することで `VolumeBindingArgs` の `Shape` 設定に基づき、DynamicProvisionの空き容量を考慮したスコアリングを実現します。
+By doing that, based on the `Shape` setting of `VolumeBindingArgs`, scoring that takes into account the free space of Dynamic Provisioning is realized.
 
 ```diff
 // Score invoked at the score extension point.
@@ -392,7 +390,7 @@ func (pl *VolumeBinding) Score(ctx context.Context, cs *framework.CycleState, po
   return pl.scorer(classResources), nil
 ```
 
-下記のPRでこれらの設計を含めたPoC実装を行っています:
+The PR below is a PoC implementation of the above design.  
 https://github.com/bells17/kubernetes/pull/1
 
 ### Test Plan
@@ -440,12 +438,8 @@ This can inform certain test coverage improvements that we want to do before
 extending the production code to implement this enhancement.
 -->
 
-- `<package>`: `<date>` - `<test coverage>`
-
-
 - Dynamic Provisioningの空き容量に応じたスコアリングが行われているかを確認するユニットテスト
 - Dynamic Provisioningの空き容量スコアとstatic bindのスコアが両方考慮されていることを確認するユニットテスト
-
 
 ##### Integration tests
 
