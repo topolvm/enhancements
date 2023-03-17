@@ -438,8 +438,10 @@ This can inform certain test coverage improvements that we want to do before
 extending the production code to implement this enhancement.
 -->
 
-- Dynamic Provisioningの空き容量に応じたスコアリングが行われているかを確認するユニットテスト
-- Dynamic Provisioningの空き容量スコアとstatic bindのスコアが両方考慮されていることを確認するユニットテスト
+The following unit tests are planned.
+
+- Is the scoring for Dynamic Provisioning appropriate to free space?
+- Are the free space score for Dynamic Provisioning and the Static Bindings score both functionally?
 
 ##### Integration tests
 
@@ -594,7 +596,7 @@ well as the [existing list] of feature gates.
 
 ###### Does enabling the feature change any default behavior?
 
-この機能を有効化するとスケジューリングの動作が変更されます。
+The scheduling behavior is changed if this function is enabled.
 
 <!--
 Any change of default behavior may be surprising to users or break existing
@@ -603,7 +605,7 @@ automations, so be extremely careful here.
 
 ###### Can the feature be disabled once it has been enabled (i.e. can we roll back the enablement)?
 
-はい、feature gateを無効にすると機能が無効化されます
+Yes, this function is disabled if the feature gate is disabled.
 
 <!--
 Describe the consequences on existing workloads (e.g., if this is a runtime
