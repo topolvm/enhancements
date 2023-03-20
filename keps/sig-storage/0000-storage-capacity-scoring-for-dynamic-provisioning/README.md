@@ -620,7 +620,7 @@ NOTE: Also set `disable-supported` to `true` or `false` in `kep.yaml`.
 
 ###### What happens if we reenable the feature if it was previously rolled back?
 
-再度スケジューリングの動作が変更されます
+The scheduling behavior is changed again.
 
 ###### Are there any tests for feature enablement/disablement?
 
@@ -647,7 +647,7 @@ This section must be completed when targeting beta to a release.
 
 ###### How can a rollout or rollback fail? Can it impact already running workloads?
 
-feature gateフラグをON/OFFすることでスケジューリングのスコアリングが変更されるだけなので影響はありません
+Turning the feature gate flag on/off only changes scheduling scoring. So there is no possibility of impacting workloads that are already running.
 
 <!--
 Try to be as paranoid as possible - e.g., what if some components will restart
@@ -661,7 +661,7 @@ will rollout across nodes.
 
 ###### What specific metrics should inform a rollback?
 
-特にありません
+Nothing in particular.
 
 <!--
 What signals should users be paying attention to when the feature is young
@@ -678,7 +678,7 @@ are missing a bunch of machinery and tooling and can't do that now.
 
 ###### Is the rollout accompanied by any deprecations and/or removals of features, APIs, fields of API types, flags, etc.?
 
-いいえ
+No, it isn't.
 
 <!--
 Even if applying deprecation policies, they may still surprise some users.
@@ -695,7 +695,7 @@ previous answers based on experience in the field.
 
 ###### How can an operator determine if the feature is in use by workloads?
 
-See featuregate.
+Check the StorageCapacityScoring feature gate.
 
 <!--
 Ideally, this should be a metric. Operations against the Kubernetes API (e.g.,
@@ -705,7 +705,7 @@ logs or events for this purpose.
 
 ###### How can someone using this feature know that it is working for their instance?
 
-kube-schedulerでStorageCapacityScoring feature gateが有効になっているかどうかを確認することで確認できます
+Check if the StorageCapacityScoring feature gate is enabled in the kube-scheduler.
 
 <!--
 For instance, if this is a pod-related feature, it should be possible to determine if the feature is functioning properly
@@ -726,7 +726,7 @@ Recall that end users cannot usually observe component logs or access metrics.
 
 ###### What are the reasonable SLOs (Service Level Objectives) for the enhancement?
 
-特に無し
+Nothing in particular.
 
 <!--
 This is your opportunity to define what "normal" quality of service looks like
@@ -745,7 +745,7 @@ question.
 
 ###### What are the SLIs (Service Level Indicators) an operator can use to determine the health of the service?
 
-特に無し
+Nothing in particular.
 
 <!--
 Pick one more of these and delete the rest.
@@ -760,7 +760,7 @@ Pick one more of these and delete the rest.
 
 ###### Are there any missing metrics that would be useful to have to improve observability of this feature?
 
-特に無し
+Nothing in particular.
 
 <!--
 Describe the metrics themselves and the reasons why they weren't added (e.g., cost,
@@ -775,7 +775,7 @@ This section must be completed when targeting beta to a release.
 
 ###### Does this feature depend on any specific services running in the cluster?
 
-はい、kube-schedulerに依存します
+Yes, it depends on the kube-scheduler.
 
 <!--
 Think about both cluster-level services (e.g. metrics-server) as well
@@ -806,7 +806,7 @@ previous answers based on experience in the field.
 
 ###### Will enabling / using this feature result in any new API calls?
 
-いいえ
+No.
 
 <!--
 Describe them, providing:
@@ -823,7 +823,7 @@ Focusing mostly on:
 
 ###### Will enabling / using this feature result in introducing new API types?
 
-いいえ
+No.
 
 <!--
 Describe them, providing:
@@ -834,7 +834,7 @@ Describe them, providing:
 
 ###### Will enabling / using this feature result in any new calls to the cloud provider?
 
-いいえ
+No.
 
 <!--
 Describe them, providing:
@@ -844,7 +844,7 @@ Describe them, providing:
 
 ###### Will enabling / using this feature result in increasing size or count of the existing API objects?
 
-いいえ
+No.
 
 <!--
 Describe them, providing:
@@ -855,7 +855,7 @@ Describe them, providing:
 
 ###### Will enabling / using this feature result in increasing time taken by any operations covered by existing SLIs/SLOs?
 
-はい、スケジューリング時間に影響がある可能性があります
+Yes, it may affect the time taken by scheduling.
 
 <!--
 Look at the [existing SLIs/SLOs].
@@ -868,7 +868,7 @@ Think about adding additional work or introducing new steps in between
 
 ###### Will enabling / using this feature result in non-negligible increase of resource usage (CPU, RAM, disk, IO, ...) in any components?
 
-いいえ
+No.
 
 <!--
 Things to keep in mind include: additional in-memory state, additional
@@ -895,7 +895,7 @@ details). For now, we leave it here.
 
 ###### How does this feature react if the API server and/or etcd is unavailable?
 
-変更内容はkube-schedulerの中のプラグインの1つのみなので、この変更による影響はありません
+The behavior in such cases does not change. This proposal only modifies one of the plugins in the kube-scheduler.
 
 ###### What are other known failure modes?
 
@@ -914,7 +914,7 @@ For each of them, fill in the following information by copying the below templat
 
 ###### What steps should be taken if SLOs are not being met to determine the problem?
 
-kube-schedulerのログを確認してください
+Check the kube-scheduler logs.
 
 ## Implementation History
 
