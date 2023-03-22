@@ -147,7 +147,7 @@ Items marked with (R) are required *prior to targeting to a milestone / release*
 
 ## Summary
 
-This KEP proposes adding dynamic provisioning scores using storage capacity to scoring with the VolumeBinding plugin.
+This KEP proposes adding scoring nodes for dynamic provisioning PVs using storage capacity in the VolumeBinding plugin.
 By considering the free space for dynamic provisioning, it is possible to schedule pods considering storage capacity.
 
 <!--
