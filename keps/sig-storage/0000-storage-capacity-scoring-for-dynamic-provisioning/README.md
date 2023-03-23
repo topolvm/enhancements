@@ -255,7 +255,7 @@ We modify the existing VolumeBinding plugin to achieve scoring for Dynamic Provi
 
 ### Modify stateData to be able to store StorageCapacity
 
-We modify the struct of `PodVolumes` contained in `stateData` for Dynamic Provisioning scoring.
+We modify the struct of `PodVolumes` contained in `stateData` to score nodes for Dynamic Provisioning.
 
 The struct of `stateData` is as follows.
 
