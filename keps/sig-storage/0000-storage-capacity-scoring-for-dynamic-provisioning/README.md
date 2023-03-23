@@ -196,7 +196,7 @@ know that this has succeeded?
 
 ### Non-Goals
 
-- Change the way its score with static and dynamic
+- Change how to score nodes for static or dynamic provisioning.
 
 <!--
 What is out of scope for this KEP? Listing non-goals helps to focus discussion
