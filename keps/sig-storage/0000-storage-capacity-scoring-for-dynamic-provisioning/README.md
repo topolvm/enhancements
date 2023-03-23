@@ -187,7 +187,7 @@ demonstrate the interest in a KEP within the wider Kubernetes community.
 
 ### Goals
 
-By considering the free space of Dynamic Provisioning, it is possible to schedule according to the free space of the volume.
+Considering free spaces of nodes for dynamic provisioning.
 
 <!--
 List the specific goals of the KEP. What is it trying to achieve? How will we
