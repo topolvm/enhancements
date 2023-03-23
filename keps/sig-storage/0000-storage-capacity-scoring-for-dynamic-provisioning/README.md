@@ -354,7 +354,7 @@ Scoring is implemented using the existing StaticBindings mechanism. Set the foll
 - `Requested: provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]`
 - `Capacity: CSIStorageCapacity`
 
-By doing that, based on the `Shape` setting of `VolumeBindingArgs`, scoring that takes into account the free space of Dynamic Provisioning is realized.
+By doing that, based on the `Shape` setting of `VolumeBindingArgs`, scoring that takes into account the free space of Dynamic Provisioning is achived.
 
 ```diff
 // Score invoked at the score extension point.
