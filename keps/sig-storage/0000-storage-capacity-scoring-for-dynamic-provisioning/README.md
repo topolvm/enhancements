@@ -441,7 +441,7 @@ extending the production code to implement this enhancement.
 The following unit tests are planned.
 
 - Is the scoring for Dynamic Provisioning appropriate to free space?
-- Are the free space score for Dynamic Provisioning and the Static Bindings score both functionally?
+- Are the free space score for Dynamic Provisioning and the Static Bindings score both functional?
 
 ##### Integration tests
 
