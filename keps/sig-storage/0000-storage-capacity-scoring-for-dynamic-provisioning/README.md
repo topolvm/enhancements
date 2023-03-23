@@ -173,7 +173,7 @@ updates.
 
 On the following cases, it is needed to schedule pods considering storage capacity.
 
-- We want to select a node with as much free space as possible so that we can resize after a node-local PV is scheduled, and use storage as evenly as possible among the nodes.
+- Because we want to resize after a node-local PV is scheduled, it should select a node with as much free space as possible.
 - Or, we want to select a node with less free node space to reduce the number of nodes as much as possible.
 
 <!--
@@ -205,7 +205,7 @@ and make progress.
 
 ## Proposal
 
-- Dynamic Provisioning can be scored based on available space
+- The score of nodes based on available space can be taken into account when dynamic provisioning
 
 <!--
 This is where we get down to the specifics of what the proposal actually is.
@@ -389,9 +389,6 @@ func (pl *VolumeBinding) Score(ctx context.Context, cs *framework.CycleState, po
 
   return pl.scorer(classResources), nil
 ```
-
-The PR below is a PoC implementation of the above design.  
-https://github.com/bells17/kubernetes/pull/1
 
 ### Test Plan
 
