@@ -368,9 +368,9 @@ func (pl *VolumeBinding) Score(ctx context.Context, cs *framework.CycleState, po
 	}
 	podVolumes, ok := state.podVolumesByNode[nodeName]
 
-    ...
+	...
 
-+   // add dynamic binding volumes by storage class
++ 	// add dynamic binding volumes by storage class
 + 	for _, provision := range podVolumes.DynamicProvisions {
 + 		if provision.Capacity == nil {
 + 			continue
