@@ -58,7 +58,7 @@ If none of those approvers are still appropriate, then changes to that list
 should be approved by the remaining approvers and/or the owning SIG (or
 SIG Architecture for cross-cutting KEPs).
 -->
-# KEP-NNNN: Storage Capacity Scoring for Dynamic Provisioning
+# KEP-NNNN: Storage Capacity Scoring of Nodes for Dynamic Provisioning
 
 <!--
 This is the title of your KEP. Keep it short, simple, and descriptive. A good
@@ -88,7 +88,7 @@ tags, and then generate with `hack/update-toc.sh`.
 - [Design Details](#design-details)
   - [Modify stateData to be able to store StorageCapacity](#modify-statedata-to-be-able-to-store-storagecapacity)
   - [Get the capacity for Dynamic Provisioning](#get-the-capacity-for-dynamic-provisioning)
-  - [Scoring for Dynamic Provisioning](#scoring-for-dynamic-provisioning)
+  - [Scoring of Nodes for Dynamic Provisioning](#scoring-of-nodes-for-dynamic-provisioning)
   - [Test Plan](#test-plan)
   - [Graduation Criteria](#graduation-criteria)
   - [Version Skew Strategy](#version-skew-strategy)
@@ -147,7 +147,7 @@ Items marked with (R) are required *prior to targeting to a milestone / release*
 
 ## Summary
 
-This KEP proposes adding scoring nodes for dynamic provisioning PVs using storage capacity in the VolumeBinding plugin.
+This KEP proposes adding scoring of nodes for dynamic provisioning PVs using storage capacity in the VolumeBinding plugin.
 By considering the free spaces of nodes for dynamic provisioning, it is possible to schedule pods on the node that has the most or least free space.
 
 <!--
@@ -251,7 +251,7 @@ required) or even code snippets. If there's any ambiguity about HOW your
 proposal will be implemented, this is the place to discuss them.
 -->
 
-We modify the existing VolumeBinding plugin to achieve scoring for Dynamic Provisioning.
+We modify the existing VolumeBinding plugin to achieve scoring of nodes for Dynamic Provisioning.
 
 ### Modify stateData to be able to store StorageCapacity
 
@@ -345,16 +345,16 @@ Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapac
 }
 ```
 
-### Scoring for Dynamic Provisioning
+### Scoring of Nodes for Dynamic Provisioning
 
-Add scoring with Dynamic Provisioning in the `Score` method of the VolumeBinding plugin. The scoring targets are each entry in `podVolumes.DynamicProvisions` where `Capacity` is not equal to `nil`.
+Add scoring of nodes for Dynamic Provisioning in the `Score` method of the VolumeBinding plugin. The scoring targets are each entry in `podVolumes.DynamicProvisions` where `Capacity` is not equal to `nil`.
 
 Scoring is implemented using the existing StaticBindings mechanism. Set the followings to `classResources` passed to the `scorer` function:
 
 - `Requested: provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]`
 - `Capacity: CSIStorageCapacity`
 
-By doing that, based on the `Shape` setting of `VolumeBindingArgs`, scoring that takes into account the free space of Dynamic Provisioning is achived.
+By doing that, based on the `Shape` setting of `VolumeBindingArgs`, scoring that takes into account the free space of nodes for Dynamic Provisioning is achieved.
 
 ```diff
 // Score invoked at the score extension point.
@@ -437,8 +437,8 @@ extending the production code to implement this enhancement.
 
 The following unit tests are planned.
 
-- Is the scoring for Dynamic Provisioning appropriate to free space?
-- Are the free space score for Dynamic Provisioning and the Static Bindings score both functional?
+- Is the scoring of nodes for Dynamic Provisioning appropriate to free space?
+- Are the free space score of nodes for Dynamic Provisioning and the Static Bindings score both functional?
 
 ##### Integration tests
 
