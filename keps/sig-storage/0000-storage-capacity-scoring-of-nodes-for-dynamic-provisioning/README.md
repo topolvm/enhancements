@@ -227,11 +227,11 @@ bogged down.
 
 #### Story 1
 
-If we want to leave room for volume expansion after node allocation, we can provision with free space in consideration during Dynamic Provisioning, so that nodes with the maximum amount of free space required can be prioritized.
+We want to leave room for volume expansion after node allocation. In this case, we can allocate the node that has the maximum amount of free space.
 
 #### Story 2
 
-When using the cloud, we want to reduce the number of nodes as much as possible to reduce costs. Therefore, we would like to increase the priority of nodes with as little remaining capacity as possible when scheduling pods so as not to create useless nodes as much as possible. By making it possible to provision with free space in mind during Dynamic Provisioning, it is possible to preferentially allocate nodes with the minimum necessary free space.
+We want to reduce the number of nodes as much as possible to reduce costs when using the cloud environment, etc. In this case, we can allocate the node that has sufficient free space and a minimum amount of free space.
 
 ### Notes/Constraints/Caveats (Optional)
 
