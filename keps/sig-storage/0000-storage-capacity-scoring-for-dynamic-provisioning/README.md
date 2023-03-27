@@ -205,7 +205,7 @@ and make progress.
 
 ## Proposal
 
-- The score of nodes based on available space can be taken into account when dynamic provisioning
+- The score of nodes based on available space can be taken into account when dynamic provisioning.
 
 <!--
 This is where we get down to the specifics of what the proposal actually is.
