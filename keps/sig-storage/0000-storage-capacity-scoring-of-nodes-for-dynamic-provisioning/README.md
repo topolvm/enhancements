@@ -87,8 +87,8 @@ tags, and then generate with `hack/update-toc.sh`.
   - [Notes/Constraints/Caveats (Optional)](#notesconstraintscaveats-optional)
 - [Design Details](#design-details)
   - [Modify stateData to be able to store StorageCapacity](#modify-statedata-to-be-able-to-store-storagecapacity)
-  - [Get the capacity for Dynamic Provisioning](#get-the-capacity-for-dynamic-provisioning)
-  - [Scoring of Nodes for Dynamic Provisioning](#scoring-of-nodes-for-dynamic-provisioning)
+  - [Get the capacity of nodes for Dynamic Provisioning](#get-the-capacity-of-nodes-for-dynamic-provisioning)
+  - [Scoring of nodes for Dynamic Provisioning](#scoring-of-nodes-for-dynamic-provisioning)
   - [Test Plan](#test-plan)
   - [Graduation Criteria](#graduation-criteria)
   - [Version Skew Strategy](#version-skew-strategy)
@@ -285,7 +285,7 @@ type PodVolumes struct {
 }
 ```
 
-### Get the capacity for Dynamic Provisioning
+### Get the capacity of nodes for Dynamic Provisioning
 
 Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapacity` method. This returns the `DynamicProvision.Capacity` field in the case of Dynamic Provisioning.
 
@@ -345,7 +345,7 @@ Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapac
 }
 ```
 
-### Scoring of Nodes for Dynamic Provisioning
+### Scoring of nodes for Dynamic Provisioning
 
 Add scoring of nodes for Dynamic Provisioning in the `Score` method of the VolumeBinding plugin. The scoring targets are each entry in `podVolumes.DynamicProvisions` where `Capacity` is not equal to `nil`.
 
