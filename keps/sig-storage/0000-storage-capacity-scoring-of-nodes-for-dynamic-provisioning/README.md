@@ -174,7 +174,7 @@ updates.
 On the following cases, it is needed to schedule pods considering storage capacity.
 
 - Because we want to resize after a node-local PV is scheduled, it should select a node with as much free space as possible.
-- Or, we want to select a node with less free node space to reduce the number of nodes as much as possible.
+- We want to select a node with less free node space to reduce the number of nodes as much as possible.
 
 <!--
 This section is for explicitly listing the motivation, goals, and non-goals of
