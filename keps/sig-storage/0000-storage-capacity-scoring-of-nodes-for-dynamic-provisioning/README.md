@@ -87,8 +87,8 @@ tags, and then generate with `hack/update-toc.sh`.
   - [Notes/Constraints/Caveats (Optional)](#notesconstraintscaveats-optional)
 - [Design Details](#design-details)
   - [Modify stateData to be able to store StorageCapacity](#modify-statedata-to-be-able-to-store-storagecapacity)
-  - [Get the capacity of nodes for Dynamic Provisioning](#get-the-capacity-of-nodes-for-dynamic-provisioning)
-  - [Scoring of nodes for Dynamic Provisioning](#scoring-of-nodes-for-dynamic-provisioning)
+  - [Get the capacity of nodes for dynamic provisioning](#get-the-capacity-of-nodes-for-dynamic-provisioning)
+  - [Scoring of nodes for dynamic provisioning](#scoring-of-nodes-for-dynamic-provisioning)
   - [Test Plan](#test-plan)
   - [Graduation Criteria](#graduation-criteria)
   - [Version Skew Strategy](#version-skew-strategy)
@@ -147,8 +147,8 @@ Items marked with (R) are required *prior to targeting to a milestone / release*
 
 ## Summary
 
-This KEP proposes adding scoring of nodes for dynamic provisioning PVs using storage capacity in the VolumeBinding plugin.
-By considering the free spaces of nodes for dynamic provisioning, it is possible to schedule pods on the node that has the most or least free space.
+This KEP proposes adding a way to score nodes for dynamic provisioning of PVs. This scoring method is based on storage capacity in the VolumeBinding plugin. 
+By considering the amount of free space that nodes have, it is possible to dynamically schedule pods on the node that has the most or least free space.
 
 <!--
 This section is incredibly important for producing high-quality, user-focused
@@ -171,10 +171,10 @@ updates.
 
 ## Motivation
 
-On the following cases, it is needed to schedule pods considering storage capacity.
+Storage capacity needs to be considered when:
 
-- Because we want to resize after a node-local PV is scheduled, it should select a node with as much free space as possible.
-- We want to select a node with less free node space to reduce the number of nodes as much as possible.
+- we want to resize after a node-local PV is scheduled. In this case we need to select a node with as much free space as possible. 
+- we want to select a node with less free node space to reduce the number of nodes as much as possible.
 
 <!--
 This section is for explicitly listing the motivation, goals, and non-goals of
@@ -187,7 +187,7 @@ demonstrate the interest in a KEP within the wider Kubernetes community.
 
 ### Goals
 
-Considering free spaces of nodes for dynamic provisioning.
+- To consider the amount of free node space on when performing dynamic provisioning.
 
 <!--
 List the specific goals of the KEP. What is it trying to achieve? How will we
@@ -196,7 +196,7 @@ know that this has succeeded?
 
 ### Non-Goals
 
-- Change how to score nodes for static or dynamic provisioning.
+- To change how to score nodes for static or dynamic provisioning.
 
 <!--
 What is out of scope for this KEP? Listing non-goals helps to focus discussion
@@ -205,7 +205,7 @@ and make progress.
 
 ## Proposal
 
-- The score of nodes based on available space can be taken into account when dynamic provisioning.
+- Node scores based on available space can be taken into account when performing dynamic provisioning.
 
 <!--
 This is where we get down to the specifics of what the proposal actually is.
@@ -227,11 +227,11 @@ bogged down.
 
 #### Story 1
 
-We want to leave room for volume expansion after node allocation. In this case, we can allocate the node that has the maximum amount of free space.
+We want to leave room for volume expansion after node allocation. In this case, we want to allocate the node that has the maximum amount of free space. 
 
 #### Story 2
 
-We want to reduce the number of nodes as much as possible to reduce costs when using the cloud environment, etc. In this case, we can allocate the node that has sufficient free space and a minimum amount of free space.
+We want to reduce the number of nodes as much as possible to reduce costs when using a cloud environment. In this case, we want to allocate the node that has the smallest amount of sufficiently free space left.
 
 ### Notes/Constraints/Caveats (Optional)
 
@@ -251,13 +251,13 @@ required) or even code snippets. If there's any ambiguity about HOW your
 proposal will be implemented, this is the place to discuss them.
 -->
 
-We modify the existing VolumeBinding plugin to achieve scoring of nodes for Dynamic Provisioning.
+We modify the existing VolumeBinding plugin to achieve scoring of nodes for dynamic provisioning.
 
 ### Modify stateData to be able to store StorageCapacity
 
-We modify the struct of `PodVolumes` contained in `stateData` to score nodes for Dynamic Provisioning.
+We modify the struct called `PodVolumes` contained in `stateData` to score nodes for dynamic provisioning.
 
-The struct of `stateData` is as follows.
+The struct of `stateData` is as follows:
 
 ```go
 type stateData struct {
@@ -270,7 +270,7 @@ type stateData struct {
 }
 ```
 
-By changing this `PodVolumes` as follows, `CSIStorageCapacity` can be stored.
+By making the following changes to `PodVolumes`, `CSIStorageCapacity` can be stored.
 
 ```diff
 + type DynamicProvision struct {
@@ -285,9 +285,9 @@ type PodVolumes struct {
 }
 ```
 
-### Get the capacity of nodes for Dynamic Provisioning
+### Get the capacity of nodes for dynamic provisioning
 
-Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapacity` method. This returns the `DynamicProvision.Capacity` field in the case of Dynamic Provisioning.
+Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapacity` method. This returns the `DynamicProvision.Capacity` field in the case of dynamic provisioning.
 
 ```diff
 - func (b *volumeBinder) hasEnoughCapacity(provisioner string, claim *v1.PersistentVolumeClaim, storageClass *storagev1.StorageClass, node *v1.Node) (bool, error) {
@@ -345,16 +345,16 @@ Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapac
 }
 ```
 
-### Scoring of nodes for Dynamic Provisioning
+### Scoring of nodes for dynamic provisioning
 
-Add scoring of nodes for Dynamic Provisioning in the `Score` method of the VolumeBinding plugin. The scoring targets are each entry in `podVolumes.DynamicProvisions` where `Capacity` is not equal to `nil`.
+Add scoring of nodes for dynamic provisioning in the `Score` method of the VolumeBinding plugin. The scoring applies to every entry in `podVolumes.DynamicProvisions` where `Capacity` is not equal to `nil`.
 
 Scoring is implemented using the existing StaticBindings mechanism. Add the following to `classResources`, which will be passed to the `scorer` function:
 
 - `Requested: provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]`
 - `Capacity: CSIStorageCapacity`
 
-By doing that, based on the `Shape` setting of `VolumeBindingArgs`, scoring that takes into account the free space of nodes for Dynamic Provisioning is achieved.
+By doing this, we can assign scores to nodes for dynamic provisioning in a way that is based on the `Shape` setting of `VolumeBindingArgs`, and which takes into account the amount of free space the nodes have.
 
 ```diff
 // Score invoked at the score extension point.
@@ -435,10 +435,10 @@ This can inform certain test coverage improvements that we want to do before
 extending the production code to implement this enhancement.
 -->
 
-The following unit tests are planned.
+The following unit tests are planned:
 
-- Is the scoring of nodes for Dynamic Provisioning appropriate to free space?
-- Are the free space score of nodes for Dynamic Provisioning and the Static Bindings score both functional?
+- Are the scores assigned to nodes for dynamic provisioning appropriate for the amount of free space?
+- Are the amount of free space score of nodes for dynamic provisioning and the Static Bindings score both functional?
 
 ##### Integration tests
 
