@@ -349,7 +349,7 @@ Add `CSIStorageCapacity` to the return value of the `volumeBinder.hasEnoughCapac
 
 Add scoring of nodes for Dynamic Provisioning in the `Score` method of the VolumeBinding plugin. The scoring targets are each entry in `podVolumes.DynamicProvisions` where `Capacity` is not equal to `nil`.
 
-Scoring is implemented using the existing StaticBindings mechanism. Set the followings to `classResources` passed to the `scorer` function:
+Scoring is implemented using the existing StaticBindings mechanism. Add the following to `classResources`, which will be passed to the `scorer` function:
 
 - `Requested: provision.PVC.Spec.Resources.Requests[v1.ResourceName(v1.ResourceStorage)]`
 - `Capacity: CSIStorageCapacity`
